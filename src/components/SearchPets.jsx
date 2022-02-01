@@ -9,23 +9,24 @@ const SearchPets = () => {
   const [searchterm, setSearchterm] = useState('');
   const [pets, setPets] = useState([]);
   const [filterAge, setFilterAge] = useState('');
-
-  useEffect(() => {
-    fetchPets();
-  }, []);
+  const [filteredRes, setFilteredRes] = useState([]);
 
   useEffect(() => {
     if (filterAge === 'Filter') fetchPetsByAge();
     else fetchPets();
   }, [filterAge]);
 
-  useEffect(() => {
-    setPets(pets);
-    const filteredPets = pets.filter((pet) =>
-      pet.name.toLowerCase().includes(searchterm),
-    );
-    setPets(filteredPets);
-  }, [searchterm]);
+  const filterPets = (searchval) => {
+    setSearchterm(searchval);
+    if (searchterm != '') {
+      const filteredPets = pets?.filter((pet) =>
+        pet.name.toLowerCase().includes(searchterm.toLowerCase()),
+      );
+      setFilteredRes(filteredPets);
+    } else {
+      setFilteredRes(pets);
+    }
+  };
 
   const fetchPets = () => {
     fetch(
@@ -59,7 +60,7 @@ const SearchPets = () => {
           <Search
             placeholder='Search pets'
             size='large'
-            onChange={(e) => setSearchterm(e.target.value.toLowerCase())}
+            onChange={(e) => filterPets(e.target.value)}
           />
           <Select
             showSearch
@@ -73,29 +74,51 @@ const SearchPets = () => {
         </div>
 
         <Row gutter={[32, 32]} className='pet-card-container'>
-          {pets.length > 0 &&
-            pets?.map((pet) => (
-              <Col xs={24} sm={12} lg={6} className='pet-card' key={pet.id}>
-                <Card
-                  title={`${pet.name}`}
-                  extra={
-                    <img
-                      src={`${pet.avatar}`}
-                      className='pet-image'
-                      alt='img'
-                    />
-                  }
-                >
-                  <h4>
-                    Age:{' '}
-                    <Moment fromNow ago>
-                      {pet.bornAt}
-                    </Moment>{' '}
-                    old
-                  </h4>
-                </Card>
-              </Col>
-            ))}
+          {searchterm.length > 1
+            ? filteredRes?.map((pet) => (
+                <Col xs={24} sm={12} lg={6} className='pet-card' key={pet.id}>
+                  <Card
+                    title={`${pet.name}`}
+                    extra={
+                      <img
+                        src={`${pet.avatar}`}
+                        className='pet-image'
+                        alt='img'
+                      />
+                    }
+                  >
+                    <h4>
+                      Age:{' '}
+                      <Moment fromNow ago>
+                        {pet.bornAt}
+                      </Moment>{' '}
+                      old
+                    </h4>
+                  </Card>
+                </Col>
+              ))
+            : pets?.map((pet) => (
+                <Col xs={24} sm={12} lg={6} className='pet-card' key={pet.id}>
+                  <Card
+                    title={`${pet.name}`}
+                    extra={
+                      <img
+                        src={`${pet.avatar}`}
+                        className='pet-image'
+                        alt='img'
+                      />
+                    }
+                  >
+                    <h4>
+                      Age:{' '}
+                      <Moment fromNow ago>
+                        {pet.bornAt}
+                      </Moment>{' '}
+                      old
+                    </h4>
+                  </Card>
+                </Col>
+              ))}
         </Row>
       </div>
     </>
